@@ -1,64 +1,35 @@
 # Stream Tools Web
 
-Website starter for Stream Tools using Next.js + Vercel + Supabase.
+Website Stream Tools berbasis Next.js + Supabase, siap untuk deploy ke Netlify.
 
-## Includes
+## Tampilan baru
+- UI dark futuristic profesional dengan glassmorphism.
+- Logo Stream Tools menggunakan image asset di `public/images/logo.png`.
+- Icon/logo mark menggunakan `public/images/logo-mark.png`.
+- Background visual menggunakan image asset `public/images/background.png`.
+- Hero memakai `public/images/hero-scene.jpg`.
+- Responsive untuk desktop dan mobile.
+- Dashboard dan Admin memakai layout sidebar modern.
 
-- Email/password Register + Login
-- Cookie-based Supabase SSR auth
-- User profile + FREE/PREMIUM plan
-- Premium activation codes
-- Secure database RLS
-- Mobile API endpoint: `GET /api/mobile/me`
-- APK download page
-- Dark neon Stream Tools UI
-
-## 1. Create Supabase project
-
-Create a Supabase project, then open **SQL Editor** and run `supabase/schema.sql`.
-
-Supabase's current Next.js guidance uses `@supabase/ssr` for cookie-based SSR sessions. See the official docs linked below.
-
-## 2. Environment variables
-
-Copy `.env.example` to `.env.local` locally, or add the same variables in Vercel Project Settings > Environment Variables:
-
+## Supabase
+Environment variables:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-- `NEXT_PUBLIC_ANDROID_DOWNLOAD_URL`
+- `NEXT_PUBLIC_ANDROID_DOWNLOAD_URL` (opsional)
 
-`SUPABASE_SERVICE_ROLE_KEY` is not required by the basic site. Keep it server-only if you later add an admin code generator.
+## Admin owner
+Akun owner yang digunakan:
+`firlykarya@gmail.com`
 
-## 3. Supabase Auth settings
-
-For email/password auth, configure the Site URL and Redirect URLs for your Vercel deployment, e.g. `https://YOUR-PROJECT.vercel.app/**` as appropriate for your Auth settings.
-
-If email confirmation is enabled, users must confirm their email before logging in.
-
-## 4. Create a premium code
-
-In Supabase SQL Editor:
+Role admin tetap ditentukan di database Supabase. Jalankan SQL berikut jika perlu:
 
 ```sql
-insert into public.premium_codes(code,duration_days,max_uses)
-values ('ST-PREMIUM-30-ABC123', 30, 1);
+UPDATE public.profiles
+SET role = 'admin', updated_at = now()
+WHERE lower(email) = lower('firlykarya@gmail.com');
 ```
 
-Then a logged-in user can redeem it at `/premium`.
+Setelah itu logout/login kembali.
 
-## 5. Run locally
-
-```bash
-npm install
-npm run dev
-```
-
-## 6. Deploy to Vercel
-
-Push this folder to GitHub, import the repository into Vercel, add the environment variables, and deploy.
-
-The Android app can authenticate with the same Supabase project. It can also call `/api/mobile/me` with a Supabase access token to retrieve the user's profile and effective premium status.
-
-
-### Owner Admin
-The owner account `firlykarya@gmail.com` is configured as an admin in `supabase/schema.sql`. Run the schema in Supabase after the account has been registered/confirmed.
+## Deploy
+Push/upload project ini ke repository/deployment Netlify seperti project sebelumnya. Asset image berada di `public/images` dan otomatis tersedia sebagai `/images/...`.
