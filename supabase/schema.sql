@@ -8,6 +8,7 @@ create table if not exists public.profiles (
   email text,
   display_name text,
   plan text not null default 'free' check (plan in ('free','premium')),
+  role text not null default 'user' check (role in ('user','admin')),
   premium_until timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
@@ -30,6 +31,10 @@ create table if not exists public.premium_redemptions (
   redeemed_at timestamptz not null default now(),
   unique(code_id,user_id)
 );
+
+alter table public.profiles add column if not exists role text not null default 'user';
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check check (role in ('user','admin'));
 
 create index if not exists premium_redemptions_user_idx on public.premium_redemptions(user_id);
 create index if not exists premium_codes_code_idx on public.premium_codes(code);
@@ -112,3 +117,4 @@ grant execute on function public.redeem_premium_code(text) to authenticated;
 
 -- Example code. Change it before sharing publicly.
 -- insert into public.premium_codes(code,duration_days,max_uses) values ('ST-PREMIUM-30-TEST',30,1);
+\n\n-- Admin helpers and policies\ncreate or replace function public.is_admin(uid uuid)\nreturns boolean\nlanguage sql\nstable\nsecurity definer\nset search_path = public\nas $$\n  select exists(select 1 from public.profiles where id = uid and role = 'admin');\n$$;\n\nrevoke all on function public.is_admin(uuid) from public;\ngrant execute on function public.is_admin(uuid) to authenticated;\n\ndrop policy if exists "admins can read all profiles" on public.profiles;\ncreate policy "admins can read all profiles" on public.profiles\n  for select to authenticated using (public.is_admin((select auth.uid())));\n\ndrop policy if exists "admins can update all profiles" on public.profiles;\ncreate policy "admins can update all profiles" on public.profiles\n  for update to authenticated\n  using (public.is_admin((select auth.uid())))\n  with check (public.is_admin((select auth.uid())));\n\ndrop policy if exists "admins can read premium codes" on public.premium_codes;\ncreate policy "admins can read premium codes" on public.premium_codes\n  for select to authenticated using (public.is_admin((select auth.uid())));\n\ndrop policy if exists "admins can insert premium codes" on public.premium_codes;\ncreate policy "admins can insert premium codes" on public.premium_codes\n  for insert to authenticated with check (public.is_admin((select auth.uid())));\n\ndrop policy if exists "admins can update premium codes" on public.premium_codes;\ncreate policy "admins can update premium codes" on public.premium_codes\n  for update to authenticated using (public.is_admin((select auth.uid()))) with check (public.is_admin((select auth.uid())));\n\ndrop policy if exists "admins can delete premium codes" on public.premium_codes;\ncreate policy "admins can delete premium codes" on public.premium_codes\n  for delete to authenticated using (public.is_admin((select auth.uid())));\n\ndrop policy if exists "admins can read redemptions" on public.premium_redemptions;\ncreate policy "admins can read redemptions" on public.premium_redemptions\n  for select to authenticated using (public.is_admin((select auth.uid())));\n
