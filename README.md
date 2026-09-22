@@ -58,3 +58,7 @@ npm run dev
 Push this folder to GitHub, import the repository into Vercel, add the environment variables, and deploy.
 
 The Android app can authenticate with the same Supabase project. It can also call `/api/mobile/me` with a Supabase access token to retrieve the user's profile and effective premium status.
+
+
+### Owner Admin
+The owner account `firlykarya@gmail.com` is configured as an admin in `supabase/schema.sql`. Run the schema in Supabase after the account has been registered/confirmed.
